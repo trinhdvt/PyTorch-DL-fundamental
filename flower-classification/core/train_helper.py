@@ -33,7 +33,9 @@ def traning_loops(epochs, model,
         "val_loss": [],
         "val_acc": []
     }
+    best_accuracy = 0
 
+    # start training loop
     for epoch in range(epochs):
         # Training phase
         # Set the model to train mode.
@@ -72,10 +74,13 @@ def traning_loops(epochs, model,
                 f"Epoch: {epoch+1}/{epochs}. Train.      {metric_monitor}")
 
         # update the tensorboard.
-        tb.add_scalar("Loss/Train", train_loss / total, epoch)
-        tb.add_scalar("Accuracy/Train", train_correct / total, epoch)
-        train_hist['train_loss'].append(train_loss / total)
-        train_hist['train_acc'].append(train_correct / total)
+        train_loss /= total
+        train_acc = train_correct / total
+
+        tb.add_scalar("Loss/Train", train_loss, epoch)
+        tb.add_scalar("Accuracy/Train", 100*train_acc, epoch)
+        train_hist['train_loss'].append(train_loss)
+        train_hist['train_acc'].append(train_acc)
 
         # Validation phase
         if val_loader:
@@ -111,10 +116,18 @@ def traning_loops(epochs, model,
                         f"Epoch: {epoch+1}/{epochs}. Valid. {metric_monitor}")
 
             # update the tensorboard.
-            tb.add_scalar("Loss/Validation", val_loss / total, epoch)
-            tb.add_scalar("Accuracy/Validation", val_correct / total, epoch)
-            train_hist['val_loss'].append(val_loss / total)
-            train_hist['val_acc'].append(val_correct / total)
+            val_loss /= total
+            val_acc = val_correct / total
+
+            tb.add_scalar("Loss/Validation", val_loss, epoch)
+            tb.add_scalar("Accuracy/Validation", 100*val_acc, epoch)
+            train_hist['val_loss'].append(val_loss)
+            train_hist['val_acc'].append(val_acc)
+
+            # save best model
+            if val_loss > best_accuracy:
+                best_accuracy = val_loss
+                torch.save(model.state_dict(), f"best_model_{epoch}.pth")
 
     tb.close()
     return train_hist
