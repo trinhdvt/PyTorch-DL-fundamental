@@ -127,7 +127,7 @@ def traning_loops(epochs, model,
             # save best model
             if val_acc > best_accuracy:
                 best_accuracy = val_acc
-                torch.save(model.state_dict(), f"best_model_{epoch}.pth")
+                torch.save(model.state_dict(), f"best_model.pth")
 
     tb.close()
     return train_hist
