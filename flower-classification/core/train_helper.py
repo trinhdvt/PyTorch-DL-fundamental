@@ -120,7 +120,7 @@ def traning_loops(epochs, model,
     return train_hist
 
 
-def test_model(model, test_loader, device="cpu", blocking=False):
+def test_model(model, test_loader, device="cpu", non_blocking=False):
     """
     Test the model.
 
@@ -139,8 +139,8 @@ def test_model(model, test_loader, device="cpu", blocking=False):
     with torch.no_grad():
         for data, target in test_stream:
             # Send the data and target to the device.
-            data, target = data.to(device, non_blocking=blocking), target.to(
-                device, non_blocking=blocking)
+            data, target = data.to(device, non_blocking=non_blocking), target.to(
+                device, non_blocking=non_blocking)
 
             # Forward pass - compute the outputs.
             outputs = model(data)
