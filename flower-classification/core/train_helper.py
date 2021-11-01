@@ -6,12 +6,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 def traning_loops(epochs, model,
-                   train_loader,
-                   optimizer,
-                   criterion,
-                   val_loader=None,
-                   device="cpu",
-                   blocking=False):
+                  train_loader,
+                  optimizer,
+                  criterion,
+                  val_loader=None,
+                  device="cpu",
+                  blocking=False):
     """
     Training loop for the model.
 
@@ -66,7 +66,8 @@ def traning_loops(epochs, model,
             total += target.size(0)
             train_correct += outputs.argmax(dim=1).eq(target).sum().item()
             metric_monitor.update("Loss", loss.item())
-            metric_monitor.update("Accuracy", calculate_accuracy(outputs, target))
+            metric_monitor.update(
+                "Accuracy", calculate_accuracy(outputs, target))
             train_stream.set_description(
                 f"Epoch: {epoch+1}/{epochs}. Train.      {metric_monitor}")
 
@@ -148,4 +149,4 @@ def test_model(model, test_loader, device="cpu", blocking=False):
             total += target.size(0)
             test_correct += outputs.argmax(dim=1).eq(target).sum().item()
 
-        print(f"Accuracy: {test_correct / total}")
+        print(f"Accuracy: {100.0*test_correct / total:.3f}")
