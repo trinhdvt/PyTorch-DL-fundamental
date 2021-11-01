@@ -1,7 +1,7 @@
 import torch
 
 from tqdm.auto import tqdm
-from utils.metric_utils import accuracy, MetricMonitor
+from utils.metric_utils import calculate_accuracy, MetricMonitor
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -66,7 +66,7 @@ def traning_loops(epochs, model,
             total += target.size(0)
             train_correct += outputs.argmax(dim=1).eq(target).sum().item()
             metric_monitor.update("Loss", loss.item())
-            metric_monitor.update("Accuracy", accuracy(outputs, target))
+            metric_monitor.update("Accuracy", calculate_accuracy(outputs, target))
             train_stream.set_description(
                 f"Epoch: {epoch+1}/{epochs}. Train.      {metric_monitor}")
 
@@ -105,7 +105,7 @@ def traning_loops(epochs, model,
                         dim=1).eq(target).sum().item()
                     metric_monitor.update("Loss", loss.item())
                     metric_monitor.update(
-                        "Accuracy", accuracy(outputs, target))
+                        "Accuracy", calculate_accuracy(outputs, target))
                     val_stream.set_description(
                         f"Epoch: {epoch+1}/{epochs}. Valid. {metric_monitor}")
 
