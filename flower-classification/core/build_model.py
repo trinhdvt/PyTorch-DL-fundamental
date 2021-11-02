@@ -27,6 +27,37 @@ class ConvBlock(nn.Module):
         return x
 
 
+def make_classifier(classifier_params, dropout=(0, 0.2, 0.3)):
+    layers = [nn.Flatten()]
+    #
+    for params in classifier_params[:-1]:
+        in_size, out_size = params
+        layers.append(nn.Linear(in_size, out_size))
+        layers.append(nn.ReLU(inplace=True))
+        layers.append(nn.Dropout(random.choice(dropout)))
+
+    # last layer with no Dropout
+    in_size, out_size = classifier_params[-1]
+    layers.append(nn.Linear(in_size, out_size))
+    layers.append(nn.LogSoftmax(dim=1))
+
+    #
+    return nn.Sequential(*layers)
+
+
+def make_backbone(conv_params, max_pool=2):
+    layers = []
+    #
+    for params in conv_params:
+        in_channels, out_channels, kernel_size, use_batch_norm = params
+        layers.append(ConvBlock(in_channels, out_channels,
+                                kernel_size, use_batch_norm))
+        if max_pool:
+            layers.append(nn.MaxPool2d(kernel_size=max_pool))
+
+    return nn.Sequential(*layers)
+
+
 class CNN(nn.Module):
     def __init__(self, num_classes, in_channels=3, input_size=224):
         super(CNN, self).__init__()
@@ -48,10 +79,10 @@ class CNN(nn.Module):
         ]
 
         #
-        self.conv = self.make_backbone(conv_params)
+        self.conv = make_backbone(conv_params)
 
         #
-        self.classifier = self.make_classifier(
+        self.classifier = make_classifier(
             classifier_params, dropout=dropout)
 
     def forward(self, x):
@@ -61,37 +92,6 @@ class CNN(nn.Module):
         # feed forward classifier's layers
         x = self.classifier(x)
         return x
-
-    @staticmethod
-    def make_backbone(conv_params, max_pool=2):
-        layers = []
-        #
-        for params in conv_params:
-            in_channels, out_channels, kernel_size, use_batch_norm = params
-            layers.append(ConvBlock(in_channels, out_channels,
-                          kernel_size, use_batch_norm))
-            if max_pool:
-                layers.append(nn.MaxPool2d(kernel_size=max_pool))
-
-        return nn.Sequential(*layers)
-
-    @staticmethod
-    def make_classifier(classifier_params, dropout=(0, 0.2, 0.3)):
-        layers = [nn.Flatten()]
-        #
-        for params in classifier_params[:-1]:
-            in_size, out_size = params
-            layers.append(nn.Linear(in_size, out_size))
-            layers.append(nn.ReLU(inplace=True))
-            layers.append(nn.Dropout(random.choice(dropout)))
-
-        # last layer with no Dropout
-        in_size, out_size = classifier_params[-1]
-        layers.append(nn.Linear(in_size, out_size))
-        layers.append(nn.LogSoftmax(dim=1))
-
-        #
-        return nn.Sequential(*layers)
 
 
 class AlexNet(nn.Module):
@@ -107,29 +107,13 @@ class AlexNet(nn.Module):
             [64, num_classes]
         ]
 
-        self.alex_net.classifier = self.make_classifier(classifier_params)
+        # replace with new classifier
+        self.alex_net.classifier = make_classifier(
+            classifier_params, dropout=(0.2, 0.3, 0.5))
 
     def forward(self, x):
         x = self.alex_net(x)
         return x
-
-    @staticmethod
-    def make_classifier(classifier_params, dropout=(0.2, 0.3, 0.5)):
-        layers = [nn.Flatten()]
-        #
-        for params in classifier_params[:-1]:
-            in_size, out_size = params
-            layers.append(nn.Linear(in_size, out_size))
-            layers.append(nn.ReLU(inplace=True))
-            layers.append(nn.Dropout(random.choice(dropout)))
-
-        # last layer with no Dropout
-        in_size, out_size = classifier_params[-1]
-        layers.append(nn.Linear(in_size, out_size))
-        layers.append(nn.LogSoftmax(dim=1))
-
-        #
-        return nn.Sequential(*layers)
 
 
 if __name__ == '__main__':
