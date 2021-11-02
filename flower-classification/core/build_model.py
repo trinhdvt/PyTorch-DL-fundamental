@@ -1,5 +1,7 @@
 from torch import nn
+from torchvision import models
 import random
+from torchsummary import summary
 
 
 class ConvBlock(nn.Module):
@@ -92,7 +94,45 @@ class CNN(nn.Module):
         return nn.Sequential(*layers)
 
 
-# if __name__ == '__main__':
-#     cnn = CNN(num_classes=5)
-#     from torchsummary import summary
-#     print(summary(cnn, input_size=(3, 224, 224)))
+class AlexNet(nn.Module):
+    def __init__(self, num_classes, in_channels=3, input_size=224):
+        super(AlexNet, self).__init__()
+        self.alex_net = models.alexnet(pretrained=True)
+
+        classifier_params = [
+            [9216, 4096],
+            [4096, 1024],
+            [1024, 512],
+            [512, 64],
+            [64, num_classes]
+        ]
+
+        self.alex_net.classifier = self.make_classifier(classifier_params)
+
+    def forward(self, x):
+        x = self.alex_net(x)
+        return x
+
+    @staticmethod
+    def make_classifier(classifier_params, dropout=(0.2, 0.3, 0.5)):
+        layers = [nn.Flatten()]
+        #
+        for params in classifier_params[:-1]:
+            in_size, out_size = params
+            layers.append(nn.Linear(in_size, out_size))
+            layers.append(nn.ReLU(inplace=True))
+            layers.append(nn.Dropout(random.choice(dropout)))
+
+        # last layer with no Dropout
+        in_size, out_size = classifier_params[-1]
+        layers.append(nn.Linear(in_size, out_size))
+        layers.append(nn.LogSoftmax(dim=1))
+
+        #
+        return nn.Sequential(*layers)
+
+
+if __name__ == '__main__':
+    cnn = AlexNet(num_classes=5)
+    cnn.to("cpu")
+    print(summary(cnn, input_size=(3, 224, 224), device='cpu'))
