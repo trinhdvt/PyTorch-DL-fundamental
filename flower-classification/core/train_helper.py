@@ -2,6 +2,8 @@ import torch
 
 from tqdm.auto import tqdm
 from utils.metric_utils import calculate_accuracy, MetricMonitor
+from utils.log_utils import write_log
+
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -11,7 +13,7 @@ def traning_loops(epochs, model,
                   criterion,
                   val_loader=None,
                   device="cpu",
-                  blocking=False):
+                  non_blocking=False):
     """
     Training loop for the model.
 
@@ -49,8 +51,8 @@ def traning_loops(epochs, model,
         train_stream = tqdm(train_loader)
         for data, target in train_stream:
             # Send the data and target to the device.
-            data, target = data.to(device, non_blocking=blocking), target.to(
-                device, non_blocking=blocking)
+            data, target = data.to(device, non_blocking=non_blocking), target.to(
+                device, non_blocking=non_blocking)
 
             # Forward pass - compute the outputs.
             outputs = model(data)
@@ -77,8 +79,10 @@ def traning_loops(epochs, model,
         train_loss /= total
         train_acc = train_correct / total
 
-        tb.add_scalar("Loss/Train", train_loss, epoch)
-        tb.add_scalar("Accuracy/Train", 100*train_acc, epoch)
+        # tb.add_scalar("Loss/Train", train_loss, epoch)
+        # tb.add_scalar("Accuracy/Train", 100*train_acc, epoch)
+        write_log(tb, {"Loss/Train": train_loss}, epoch)
+        write_log(tb, {"Accuracy/Train": 100*train_acc}, epoch)
         train_hist['train_loss'].append(train_loss)
         train_hist['train_acc'].append(train_acc)
 
@@ -96,8 +100,8 @@ def traning_loops(epochs, model,
             with torch.no_grad():
                 for data, target in val_stream:
                     # Send the data and target to the device.
-                    data, target = data.to(device, non_blocking=blocking), target.to(
-                        device, non_blocking=blocking)
+                    data, target = data.to(device, non_blocking=non_blocking), target.to(
+                        device, non_blocking=non_blocking)
 
                     # Forward pass - compute the outputs.
                     outputs = model(data)
@@ -119,8 +123,10 @@ def traning_loops(epochs, model,
             val_loss /= total
             val_acc = val_correct / total
 
-            tb.add_scalar("Loss/Validation", val_loss, epoch)
-            tb.add_scalar("Accuracy/Validation", 100*val_acc, epoch)
+            # tb.add_scalar("Loss/Validation", val_loss, epoch)
+            # tb.add_scalar("Accuracy/Validation", 100*val_acc, epoch)
+            write_log(tb, {"Loss/Validation": val_loss}, epoch)
+            write_log(tb, {"Accuracy/Validation": 100*val_acc}, epoch)
             train_hist['val_loss'].append(val_loss)
             train_hist['val_acc'].append(val_acc)
 
