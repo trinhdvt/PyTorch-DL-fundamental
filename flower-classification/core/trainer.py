@@ -12,6 +12,7 @@ def traning_loops(epochs, model,
                   val_loader,
                   optimizer,
                   criterion,
+                  scheduler=None,
                   device="cpu",
                   non_blocking=False):
     """
@@ -23,6 +24,7 @@ def traning_loops(epochs, model,
     :param val_loader: The validation data.
     :param optimizer: The optimizer to use.
     :param criterion: The loss function to use.
+    :param scheduler: The scheduler to use.
     :param device: The device to use.
     :return: The trained model.
     """
@@ -88,21 +90,25 @@ def traning_loops(epochs, model,
                 stream.set_description(
                     f"Epoch: {n_epoch+1}/{epochs}. {phase.capitalize()}.      {metric_monitor}")
 
+            # Update the learning rate.
+            if phase == "train" and scheduler is not None:
+                scheduler.step()
+
             # update log.
             running_loss /= total
             accuracy = running_correct / total
 
-            write_log(
-                tb, {f"Loss/{phase.capitalize()}": running_loss}, n_epoch)
-            write_log(
-                tb, {f"Accuracy/{phase.capitalize()}": 100*accuracy}, n_epoch)
+            cpt_phase = phase.capitalize()
+            write_log(tb, {f"Loss/{cpt_phase}": running_loss}, n_epoch)
+            write_log(tb, {f"Accuracy/{cpt_phase}": 100*accuracy}, n_epoch)
             train_hist[f'{phase}_loss'].append(running_loss)
             train_hist[f'{phase}_acc'].append(accuracy)
 
             # update best accuracy.
             if phase == 'val' and accuracy > best_accuracy:
                 best_accuracy = accuracy
-                torch.save(model.state_dict(), "best_model.pth")
+                model_name = model.__class__.__name__
+                torch.save(model.state_dict(), f"{model_name}_best_model.pth")
 
     tb.close()
     return train_hist
