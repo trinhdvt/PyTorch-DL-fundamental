@@ -2,13 +2,11 @@ import matplotlib.pyplot as plt
 from core.data_loader import inv_normalize
 
 
-def display(images, truth_labels, class_names, predicted=None, size=10, figsize=(5, 8)):
+def display(images, truth_labels, class_names,
+            predicted=None, size=10, figsize=(5, 8),
+            save_path=None):
     images = images.cpu()
     truth_labels = truth_labels.cpu()
-
-    #
-    # print(f"Labels: {truth_labels.numpy()}")
-    # print(f"Class: ", *[class_names[i] for i in truth_labels.numpy()])
 
     #
     images = inv_normalize(images)
@@ -29,7 +27,10 @@ def display(images, truth_labels, class_names, predicted=None, size=10, figsize=
 
         ax.set_title(
             predicted_label if predicted_label is not None else truth_label, color=color)
-
+    if save_path:
+        plt.savefig(save_path)
+    
+    # 
     plt.tight_layout()
     plt.show()
 
