@@ -14,7 +14,8 @@ def traning_loops(epochs, model,
                   criterion,
                   scheduler=None,
                   device="cpu",
-                  non_blocking=False):
+                  non_blocking=False,
+                  model_name="custom"):
     """
     Training loop for the model.
 
@@ -26,6 +27,7 @@ def traning_loops(epochs, model,
     :param criterion: The loss function to use.
     :param scheduler: The scheduler to use.
     :param device: The device to use.
+    :param model_name: The name of the model to be saved
     :return: The trained model.
     """
 
@@ -107,10 +109,10 @@ def traning_loops(epochs, model,
             # update best accuracy.
             if phase == 'val' and accuracy > best_accuracy:
                 best_accuracy = accuracy
-                model_name = model.__class__.__name__
-                torch.save(model.state_dict(), f"{model_name}_best_model.pth")
+                torch.save(model, f"{model_name}_best.pth")
 
     tb.close()
+    torch.save(model, f"{model_name}_last.pth")
     return train_hist
 
 
