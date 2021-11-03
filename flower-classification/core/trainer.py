@@ -101,8 +101,12 @@ def traning_loops(epochs, model,
             accuracy = running_correct / total
 
             cpt_phase = phase.capitalize()
-            write_log(tb, {f"Loss/{cpt_phase}": running_loss}, n_epoch)
-            write_log(tb, {f"Accuracy/{cpt_phase}": 100*accuracy}, n_epoch)
+            log = {
+                f"Loss/{cpt_phase}": running_loss,
+                f"Accuracy/{cpt_phase}": 100*accuracy,
+                "epoch": n_epoch+1
+            }
+            write_log(tb, log, n_epoch)
             train_hist[f'{phase}_loss'].append(running_loss)
             train_hist[f'{phase}_acc'].append(accuracy)
 
