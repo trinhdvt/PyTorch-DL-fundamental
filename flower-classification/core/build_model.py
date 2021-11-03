@@ -94,10 +94,18 @@ class CNN(nn.Module):
         return x
 
 
+def get_alexnet():
+    alex_net = models.alexnet(pretrained=True)
+    # freeze all layers
+    for param in alex_net.parameters():
+        param.requires_grad = False
+    return alex_net
+
+
 class AlexNet(nn.Module):
     def __init__(self, num_classes, in_channels=3, input_size=224):
         super(AlexNet, self).__init__()
-        self.alex_net = models.alexnet(pretrained=True)
+        self.alex_net = get_alexnet()
 
         classifier_params = [
             [9216, 4096],
@@ -109,7 +117,7 @@ class AlexNet(nn.Module):
 
         # replace with new classifier
         self.alex_net.classifier = make_classifier(
-            classifier_params, dropout=(0.2, 0.3, 0.5))
+            classifier_params, dropout=(0.3, 0.5))
 
     def forward(self, x):
         x = self.alex_net(x)
