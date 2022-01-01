@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
-from core.data_loader import inv_normalize
+
+from ..core.data_loader import inv_normalize
 
 
 def display(images, truth_labels, class_names,
@@ -11,7 +12,7 @@ def display(images, truth_labels, class_names,
     #
     images = inv_normalize(images)
     fig, axes = plt.subplots(
-        ncols=5, nrows=size//5,
+        ncols=5, nrows=size // 5,
         figsize=figsize,
         subplot_kw={'xticks': [], 'yticks': []})
     for i, ax in enumerate(axes.flat):
@@ -29,7 +30,7 @@ def display(images, truth_labels, class_names,
             predicted_label if predicted_label is not None else truth_label, color=color)
     if save_path:
         plt.savefig(save_path)
-    
+
     # 
     plt.tight_layout()
     plt.show()

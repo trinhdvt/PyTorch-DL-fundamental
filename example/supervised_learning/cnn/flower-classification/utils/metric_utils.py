@@ -3,6 +3,7 @@ from collections import defaultdict
 
 class MetricMonitor:
     def __init__(self, float_precision=3):
+        self.metrics = None
         self.float_precision = float_precision
         self.reset()
 

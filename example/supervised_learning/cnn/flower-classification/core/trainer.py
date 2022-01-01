@@ -1,10 +1,9 @@
 import torch
-
-from tqdm.auto import tqdm
-from utils.metric_utils import calculate_accuracy, MetricMonitor
-from utils.log_utils import write_log
-
 from torch.utils.tensorboard import SummaryWriter
+from tqdm.auto import tqdm
+
+from ..utils.log_utils import write_log
+from ..utils.metric_utils import calculate_accuracy, MetricMonitor
 
 
 def traning_loops(epochs, model,
@@ -19,6 +18,7 @@ def traning_loops(epochs, model,
     """
     Training loop for the model.
 
+    :param non_blocking:
     :param epochs: Number of epochs to train the model.
     :param model: The model to train.
     :param train_loader: The training data.
@@ -39,7 +39,7 @@ def traning_loops(epochs, model,
         "val_loss": [],
         "val_acc": []
     }
-    dataloaders = {
+    dataloader = {
         "train": train_loader,
         "val": val_loader
     }
@@ -60,7 +60,7 @@ def traning_loops(epochs, model,
             running_correct = 0
             total = 0
             # Loop over the batches in the training set.
-            stream = tqdm(dataloaders[phase])
+            stream = tqdm(dataloader[phase])
             for data, target in stream:
                 # Send the data and target to the device.
                 data = data.to(device, non_blocking=non_blocking)
@@ -90,7 +90,7 @@ def traning_loops(epochs, model,
                 metric_monitor.update(
                     "Accuracy", calculate_accuracy(outputs, target))
                 stream.set_description(
-                    f"Epoch: {n_epoch+1}/{epochs}. {phase.capitalize()}.      {metric_monitor}")
+                    f"Epoch: {n_epoch + 1}/{epochs}. {phase.capitalize()}.      {metric_monitor}")
 
             # Update the learning rate.
             if phase == "train" and scheduler is not None:
@@ -103,8 +103,8 @@ def traning_loops(epochs, model,
             cpt_phase = phase.capitalize()
             log = {
                 f"Loss/{cpt_phase}": running_loss,
-                f"Accuracy/{cpt_phase}": 100*accuracy,
-                "epoch": n_epoch+1
+                f"Accuracy/{cpt_phase}": 100 * accuracy,
+                "epoch": n_epoch + 1
             }
             write_log(tb, log, n_epoch)
             train_hist[f'{phase}_loss'].append(running_loss)
@@ -149,4 +149,4 @@ def test_model(model, test_loader, device="cpu", non_blocking=False):
             total += target.size(0)
             test_correct += outputs.argmax(dim=1).eq(target).sum().item()
 
-        print(f"Accuracy: {100.0*test_correct / total:.3f} %")
+        print(f"Accuracy: {100.0 * test_correct / total:.3f} %")

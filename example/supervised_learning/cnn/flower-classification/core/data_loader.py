@@ -1,5 +1,5 @@
-from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
 
 train_transforms = transforms.Compose([
     transforms.RandomRotation(15),
@@ -19,8 +19,8 @@ test_transforms = transforms.Compose([
 ])
 
 inv_normalize = transforms.Normalize(
-    mean=[-0.485/0.229, -0.456/0.224, -0.406/0.225],
-    std=[1/0.229, 1/0.224, 1/0.225]
+    mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.225],
+    std=[1 / 0.229, 1 / 0.224, 1 / 0.225]
 )
 
 

@@ -1,7 +1,8 @@
-from torch import nn
-from torchvision import models
 import random
-from torchsummary import summary
+
+from torch import nn
+from torchinfo import summary
+from torchvision import models
 
 
 class ConvBlock(nn.Module):
@@ -69,10 +70,10 @@ class CNN(nn.Module):
             [64, 128, 3, True],
             [128, 256, 3, True]
         ]
-        pooled_size = input_size // 2**len(conv_params)
+        pooled_size = input_size // 2 ** len(conv_params)
         dropout = (0, 0.2, 0.3)
         classifier_params = [
-            [256*pooled_size*pooled_size, 512],
+            [256 * pooled_size * pooled_size, 512],
             [512, 128],
             [128, 64],
             [64, num_classes]
@@ -127,4 +128,4 @@ class AlexNet(nn.Module):
 if __name__ == '__main__':
     cnn = AlexNet(num_classes=5)
     cnn.to("cpu")
-    print(summary(cnn, input_size=(3, 224, 224), device='cpu'))
+    summary(cnn, (1, 3, 224, 224))
